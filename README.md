@@ -1,2 +1,2 @@
 # spring-reddit-clone
-A reddit clone using Spring Boot
+A clone of reddit using Spring Boot
