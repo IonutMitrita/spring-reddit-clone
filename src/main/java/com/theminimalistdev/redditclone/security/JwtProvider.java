@@ -1,6 +1,7 @@
 package com.theminimalistdev.redditclone.security;
 
 import com.theminimalistdev.redditclone.exceptions.SpringRedditException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import java.security.cert.CertificateException;
 import java.sql.Date;
 import java.time.Instant;
 
+import static io.jsonwebtoken.Jwts.parser;
 import static java.util.Date.from;
 
 @Service
@@ -53,6 +55,30 @@ public class JwtProvider {
             throw new SpringRedditException("Exception occured while retrieving public key from keystore", e);
         }
     }
+
+    public String getUsernameFromJwt(String token) {
+        Claims claims = parser()
+                .setSigningKey(getPublickey())
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
+    public boolean validateToken(String jwt) {
+        parser().setSigningKey(getPublickey()).parseClaimsJws(jwt);
+        return true;
+    }
+
+    private PublicKey getPublickey() {
+        try {
+            return keyStore.getCertificate("springblog").getPublicKey();
+        } catch (KeyStoreException e) {
+            throw new SpringRedditException("Exception occured while " +
+                    "retrieving public key from keystore", e);
+        }
+    }
+
 
     public Long getJwtExpirationInMillis() {
         return jwtExpirationInMillis;
